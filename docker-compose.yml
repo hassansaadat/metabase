@@ -1,6 +1,8 @@
 services:
   db:
-    image: postgres:13.1-alpine
+    image: postgres:${POSTGRES_VERSION}
+    hostname: metabase-db
+    container_name: metabase-db
     restart: always
     volumes:
       - db-data:${DB_DATA_DIR}
@@ -9,9 +11,14 @@ services:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+    networks:
+      - meta-compose
+      - metanet
 
   metabase:
-    image: metabase/metabase:latest
+    image: metabase/metabase:${METABASE_VERSION}
+    hostname: metabase
+    container_name: metabase
     restart: always
     environment:
       MB_DB_TYPE: "postgres"
@@ -23,22 +30,29 @@ services:
       MB_PASSWORD_COMPLEXITY: strong
       MB_PASSWORD_LENGTH: 10
       JAVA_TIMEZONE: "${MB_JAVA_TIMEZONE}"
+    volumes:
+      - /dev/urandom:/dev/random:ro
+    networks:
+      - meta-compose
+      - metanet
+    healthcheck:
+      test: curl --fail -I http://localhost:3000/api/health || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
     ports:
-      - 127.0.0.1:${MB_PORT}:3000
+      - ${MB_PORT}:3000
     extra_hosts:
       - host.docker.internal:host-gateway
-    networks:
-      default:
-        ipv4_address: 172.16.200.30
     depends_on:
       - db
 
 networks:
-  default:
-    ipam:
-      driver: default
-      config:
-        - subnet: "172.16.200.0/24"
+  meta-compose:
+    driver: bridge
+  metanet:
+    name: metanet
+    external: true
 
 volumes:
   db-data:

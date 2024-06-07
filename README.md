@@ -9,14 +9,13 @@ Based on official docker images for [PostgreSQL] and [Metabase].
 
 - Clone this repository.
 - Copy `.env.sample` to `.env` and adjust the variables.
+- Create `metanet` network to connect metabase to other docker databases.
 - Start services locally using Docker Compose.
 
   ```shell
+  $ docker network create --driver bridge metanet
   $ docker compose up
   ```
-
-Metabase can connect to host (`host.docker.internal`) from static IP `172.16.200.30`,
-(static IP can be used for authentication. e.g. in `pg_hba.conf`)
 
 ## References
 
