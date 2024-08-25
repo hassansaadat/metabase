@@ -29,6 +29,7 @@ services:
       MB_DB_HOST: "db"
       MB_PASSWORD_COMPLEXITY: strong
       MB_PASSWORD_LENGTH: 10
+      MB_LOG_LEVEL: info
       JAVA_TIMEZONE: "${MB_JAVA_TIMEZONE}"
     volumes:
       - /dev/urandom:/dev/random:ro
@@ -46,6 +47,11 @@ services:
       - host.docker.internal:host-gateway
     depends_on:
       - db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
 
 networks:
   meta-compose:
